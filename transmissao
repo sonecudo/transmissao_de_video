@@ -1,0 +1,28 @@
+#!/bin/bash
+
+echo -e "Esperando url do tipo: \e[1;32minvidio.us/watch?v=(id do vídeo)\e[0m ou \e[1;32myoutube.com/watch?v=(id do vídeo)\e[0m";
+echo -n "Cole a URL: ";
+read URL
+VID=$(echo "$URL" | sed "s/.*?v=//")
+
+echo -e "\e[33mRequisitando: https://invidio.us/latest_version?id=$VID&itag=22\e[0m"
+
+URL=$(proxychains -q curl -i "https://invidio.us/latest_version?id=$VID&itag=22" 2>/dev/null |grep "Location: "|sed "s/Location: //")
+if [ -z "$URL" ];
+then
+	echo -e "\e[33mRequisitando: https://invidio.us/latest_version?id=$VID&itag=18\e[0m"
+	URL=$(proxychains -q curl -i "https://invidio.us/latest_version?id=$VID&itag=18" 2>/dev/null |grep "Location: "|sed "s/Location: //")
+fi
+
+if [ -z "$URL" ];
+then
+	echo -e "[\e[32mINFO\e[0m] Link de stream não disponível";
+	exit;
+fi
+
+echo -e "\e[32m$URL\e[0m";
+
+echo -e "\e[33mAbrindo no VLC\e[0m\n"
+vlc $URL 2>/dev/null &
+#echo -e "\e[33mAbrindo no Parole\e[0m\n"
+#parole $URL 2>/dev/null &
