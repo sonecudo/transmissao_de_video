@@ -14,17 +14,12 @@ import requests, string
 from colorama import Fore,Back,Style
 from bs4 import BeautifulSoup
 
-def char_filther(var):
-	res = "";
-	for letter in var:
-			if( letter in string.printable ):
-				res+=letter;
-	return res;
 
 search_term= sys.argv[1].replace(" ", "+");
 print("Disparando requisição! :: "+"https://invidio.us/search?q="+search_term);
 headers={"User-agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/71.0"};
 r = requests.get("https://invidio.us/search?q="+search_term);
+r.encoding="unicode";
 
 soup = BeautifulSoup(r.text, "lxml");
 soup = soup.find_all("div", class_="pure-g")[2];
@@ -34,13 +29,13 @@ for video in soup.find_all("div", class_="h-box"):
 	#print( video );
 	try: #NOME DO CANAL
 		canal = video.find_all("a")[2];
-		print( char_filther(canal.text) );
+		print( canal.text );
 	except:
 		pass;
 	try:
 		titulo = video.find_all("a")[1];
 		views = video.find("div", class_="pure-u-1-3").text.strip();
-		print( Style.BRIGHT+Fore.GREEN+char_filther( titulo.text.strip() )+Style.RESET_ALL+" ["+video.p.text+"]"+" | "+Fore.CYAN+views+Style.RESET_ALL );
+		print( Style.BRIGHT+Fore.GREEN+titulo.text.strip()+Style.RESET_ALL+" ["+video.p.text+"]"+" | "+Fore.CYAN+views+Style.RESET_ALL );
 		print( Fore.YELLOW+"https://invidio.us"+titulo["href"]+Style.RESET_ALL );
 		print( Fore.YELLOW+"https://youtube.com"+titulo["href"]+Style.RESET_ALL );
 	except:

@@ -25,4 +25,4 @@ echo -e "\e[32m$URL\e[0m";
 echo -e "\e[33mAbrindo no VLC\e[0m\n"
 vlc $URL 2>/dev/null &
 #echo -e "\e[33mAbrindo no Parole\e[0m\n"
-#parole $URL 2>/dev/null &
+#proxychains -q parole $URL 2>/dev/null &
