@@ -1,28 +1,65 @@
 #!/bin/bash
+info="[\e[32mINFO\e[0m]"
+erro="[\e[31mERRO\e[0m]"
 
-echo -e "Esperando url do tipo: \e[1;32minvidio.us/watch?v=(id do vídeo)\e[0m ou \e[1;32myoutube.com/watch?v=(id do vídeo)\e[0m";
-echo -n "Cole a URL: ";
-read URL
-VID=$(echo "$URL" | sed "s/.*?v=//")
+## Informação sobre padrão de url
+echo -e "$info Tipo de url:"
+echo -e "$info\t~> \e[33minvidio.us/watch?v=(id do vídeo)\e[0m"
+echo -e "$info\t~> \e[33myoutube.com/watch?v=(id do vídeo)\e[0m"
 
-echo -e "\e[33mRequisitando: https://invidio.us/latest_version?id=$VID&itag=22\e[0m"
+##  Recebe url
+echo -n -e "$info Cole a url: ";
+read url
+vid=$(echo "$url" | sed "s/.*?v=//")
 
-URL=$(proxychains -q curl -i "https://invidio.us/latest_version?id=$VID&itag=22" 2>/dev/null |grep "Location: "|sed "s/Location: //")
-if [ -z "$URL" ];
+## Requisita link de streaming para qualidade 18
+link_req="https://invidio.us/latest_version?id=$vid&itag=18"
+echo -e "$info Requisitando: \e[33m$link_req\e[0m"
+url=$(proxychains -q curl -i $link_req 2>/dev/null \
+ |grep "Location: " \
+ |sed "s/Location: //" )
+
+
+## Se não conseguiu o link de streaming qualidade 18
+if [ -z "$url" ]
 then
-	echo -e "\e[33mRequisitando: https://invidio.us/latest_version?id=$VID&itag=18\e[0m"
-	URL=$(proxychains -q curl -i "https://invidio.us/latest_version?id=$VID&itag=18" 2>/dev/null |grep "Location: "|sed "s/Location: //")
+	## Requisita link de streaming para qualidade 22
+	link_req="https://invidio.us/latest_version?id=$vid&itag=22"
+	echo -e "$info Requisitando: \e[33m$link_req\e[0m"
+	url=$(proxychains -q curl -i $link_req 2>/dev/null \
+	 |grep "Location: " \
+	 |sed "s/Location: //")
 fi
 
-if [ -z "$URL" ];
+## Se não conseguiu link de streaming
+if [ -z "$url" ]
 then
-	echo -e "[\e[32mINFO\e[0m] Link de stream não disponível";
-	exit;
+	echo -e "$erro Sem link de stream disponível";
+	exit 1
 fi
 
-echo -e "\e[32m$URL\e[0m";
+echo -e "$info url: \e[2;96m$url\e[0m";
 
-echo -e "\e[33mAbrindo no VLC\e[0m\n"
-vlc $URL 2>/dev/null &
-#echo -e "\e[33mAbrindo no Parole\e[0m\n"
-#proxychains -q parole $URL 2>/dev/null &
+## Seleção de player
+echo -e "$info Selecione um player"
+modos=("mplayer: Vídeo" "mplayer: Só áudio" "parole")
+select modo in "${modos[@]}"
+do
+	case $modo in
+		"mplayer: Só áudio")
+			echo -e "$info \e[33mRecebendo áudio...\e[0m"
+			proxychains -q mplayer -vo null $url 2>/dev/null
+			;;
+		"mplayer: Vídeo")
+			echo -e "$info \e[33mRecebendo vídeo...\e[0m"
+			proxychains -q mplayer $url 2>/dev/null
+			;;
+		"parole")
+			echo -e "$info \e[33mRecebendo vídeo...\e[0m"
+			proxychains -q parole $url 2>/dev/null &
+			;;
+		#Outras opções
+		#vlc $url #não funciona com proxychains
+	esac
+	exit 0
+done
