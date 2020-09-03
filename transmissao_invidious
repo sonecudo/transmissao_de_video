@@ -1,11 +1,14 @@
 #!/bin/bash
+
+instancia="https://invidious.fdn.fr"
+#instancia="https://invidious.site"
+
 info="[\e[32mINFO\e[0m]"
 erro="[\e[31mERRO\e[0m]"
 
 ## Informação sobre padrão de url
 echo -e "$info Tipo de url:"
-echo -e "$info\t~> \e[33minvidio.us/watch?v=(id do vídeo)\e[0m"
-echo -e "$info\t~> \e[33myoutube.com/watch?v=(id do vídeo)\e[0m"
+echo -e "$info\t~> \e[33m/watch?v=(id do vídeo)\e[0m"
 
 ##  Recebe url
 echo -n -e "$info Cole a url: ";
@@ -13,32 +16,32 @@ read url
 vid=$(echo "$url" | sed "s/.*?v=//")
 
 ## Requisita link de streaming para qualidade 18
-link_req="https://invidio.us/latest_version?id=$vid&itag=18"
+link_req="$instancia/latest_version?id=$vid&itag=18"
 echo -e "$info Requisitando: \e[33m$link_req\e[0m"
 url=$(proxychains -q curl -i $link_req 2>/dev/null \
- |grep "Location: " \
- |sed "s/Location: //" )
+ |grep -i "location: " \
+ |sed "s/location: //" )
 
 
 ## Se não conseguiu o link de streaming qualidade 18
 if [ -z "$url" ]
 then
 	## Requisita link de streaming para qualidade 22
-	link_req="https://invidio.us/latest_version?id=$vid&itag=22"
+	link_req="$instancia/latest_version?id=$vid&itag=22"
 	echo -e "$info Requisitando: \e[33m$link_req\e[0m"
 	url=$(proxychains -q curl -i $link_req 2>/dev/null \
-	 |grep "Location: " \
-	 |sed "s/Location: //")
+	 |grep -i "location: " \
+	 |sed "s/location: //")
 fi
 
 ## Se não conseguiu link de streaming
 if [ -z "$url" ]
 then
-	echo -e "$erro Sem link de stream disponível";
+	echo -e "$erro Sem link de stream disponível"
 	exit 1
 fi
 
-echo -e "$info url: \e[2;96m$url\e[0m";
+echo -e "$info url: \e[2;96m$url\e[0m"
 
 ## Seleção de player
 echo -e "$info Selecione um player"

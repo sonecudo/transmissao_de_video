@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
-#   Pesquisa de vídeos via terminal
-#   @utor soneca
+# Pesquisa de vídeos via terminal
+# @utor soneca
 #
 
 import sys
@@ -14,11 +14,12 @@ import requests, string
 from colorama import Fore,Back,Style
 from bs4 import BeautifulSoup
 
+instancia="https://invidious.fdn.fr"
 
 search_term= sys.argv[1].replace(" ", "+");
-print("Disparando requisição! :: "+"https://invidio.us/search?q="+search_term);
-headers={"User-agent" : "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/71.0"};
-r = requests.get("https://invidio.us/search?q="+search_term);
+print("Disparando requisição! :: "+instancia+"/search?q="+search_term);
+headers={"User-agent" : "Mozilla/5.0 (Windows NT 10; rv:68.0) Gecko/20100101 Firefox/68.0"};
+r = requests.get(instancia+"/search?q="+search_term);
 r.encoding="unicode";
 
 soup = BeautifulSoup(r.text, "lxml");
