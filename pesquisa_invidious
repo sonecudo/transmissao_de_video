@@ -37,7 +37,7 @@ for video in soup.find_all("div", class_="h-box"):
 		titulo = video.find_all("a")[1];
 		views = video.find("div", class_="pure-u-1-3").text.strip();
 		print( Style.BRIGHT+Fore.GREEN+titulo.text.strip()+Style.RESET_ALL+" ["+video.p.text+"]"+" | "+Fore.CYAN+views+Style.RESET_ALL );
-		print( Fore.YELLOW+"https://invidio.us"+titulo["href"]+Style.RESET_ALL );
+		print( Fore.YELLOW+"https://invidious.fdn.fr"+titulo["href"]+Style.RESET_ALL );
 		print( Fore.YELLOW+"https://youtube.com"+titulo["href"]+Style.RESET_ALL );
 	except:
 		pass;
