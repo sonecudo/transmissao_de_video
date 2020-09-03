@@ -7,4 +7,4 @@ As ferramentas usam o invidio.us([git](https://github.com/omarroth/invidious)), 
 	script em python que usa requests e BeautifulSoup 4 para buscar e filtrar vídeos.
 
 ### transmissao
-	script em shell que pede link de transmissão para o invidious e abre no vlc.
+	script em shell que pede link de transmissão para o invidious e abre direto num player
