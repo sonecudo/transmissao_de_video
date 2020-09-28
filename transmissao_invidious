@@ -51,11 +51,11 @@ do
 	case $modo in
 		"mplayer: Só áudio")
 			echo -e "$info \e[33mRecebendo áudio...\e[0m"
-			proxychains -q mplayer -vo null $url 2>/dev/null
+			proxychains -q mplayer -vo null -cache 2048 $url 2>/dev/null
 			;;
 		"mplayer: Vídeo")
 			echo -e "$info \e[33mRecebendo vídeo...\e[0m"
-			proxychains -q mplayer $url 2>/dev/null
+			proxychains -q mplayer -cache 10000 $url 2>/dev/null
 			;;
 		"parole")
 			echo -e "$info \e[33mRecebendo vídeo...\e[0m"
