@@ -14,7 +14,8 @@ import requests, string
 from colorama import Fore,Back,Style
 from bs4 import BeautifulSoup
 
-instancia="https://invidious.fdn.fr"
+#instancia="https://invidious.fdn.fr"
+instancia="https://invidious.snopyta.org"
 
 search_term= sys.argv[1].replace(" ", "+");
 print("Disparando requisição! :: "+instancia+"/search?q="+search_term);
@@ -23,7 +24,12 @@ r = requests.get(instancia+"/search?q="+search_term);
 r.encoding="unicode";
 
 soup = BeautifulSoup(r.text, "lxml");
-soup = soup.find_all("div", class_="pure-g")[2];
+
+try:
+    soup = soup.find_all("div", class_="pure-g")[2];
+except:
+    print("Falha");
+    exit();
 
 for video in soup.find_all("div", class_="h-box"):
 	print( "-------------" );

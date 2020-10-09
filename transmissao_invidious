@@ -1,7 +1,13 @@
 #!/bin/bash
 
-instancia="https://invidious.fdn.fr"
-#instancia="https://invidious.site"
+if [ -z $1 ]
+then
+	echo -e "\e[31mUso: $0 [-audio|-video]\e[0m"
+	exit 0;
+fi
+
+qualidade="18" #qualidade baixa
+#qualidade="22" #qualidade alta
 
 info="[\e[32mINFO\e[0m]"
 erro="[\e[31mERRO\e[0m]"
@@ -15,26 +21,27 @@ echo -n -e "$info Cole a url: ";
 read url
 vid=$(echo "$url" | sed "s/.*?v=//")
 
-## Requisita link de streaming para qualidade 18
-link_req="$instancia/latest_version?id=$vid&itag=18"
+## Requisita link de streaming para na primeira instância
+instancia="https://invidious.fdn.fr"
+link_req="$instancia/latest_version?id=$vid&itag=$qualidade"
 echo -e "$info Requisitando: \e[33m$link_req\e[0m"
 url=$(proxychains -q curl -i $link_req 2>/dev/null \
  |grep -i "location: " \
  |sed "s/location: //" )
 
 
-## Se não conseguiu o link de streaming qualidade 18
+## Se não conseguiu o link de streaming na primeira instância
 if [ -z "$url" ]
 then
-	## Requisita link de streaming para qualidade 22
-	link_req="$instancia/latest_version?id=$vid&itag=22"
+	instancia="https://invidious.glie.town"
+	link_req="$instancia/latest_version?id=$vid&itag=$qualidade"
 	echo -e "$info Requisitando: \e[33m$link_req\e[0m"
 	url=$(proxychains -q curl -i $link_req 2>/dev/null \
 	 |grep -i "location: " \
 	 |sed "s/location: //")
 fi
 
-## Se não conseguiu link de streaming
+##
 if [ -z "$url" ]
 then
 	echo -e "$erro Sem link de stream disponível"
@@ -43,26 +50,12 @@ fi
 
 echo -e "$info url: \e[2;96m$url\e[0m"
 
-## Seleção de player
-echo -e "$info Selecione um player"
-modos=("mplayer: Vídeo" "mplayer: Só áudio" "parole")
-select modo in "${modos[@]}"
-do
-	case $modo in
-		"mplayer: Só áudio")
-			echo -e "$info \e[33mRecebendo áudio...\e[0m"
-			proxychains -q mplayer -vo null -cache 2048 $url 2>/dev/null
-			;;
-		"mplayer: Vídeo")
-			echo -e "$info \e[33mRecebendo vídeo...\e[0m"
-			proxychains -q mplayer -cache 10000 $url 2>/dev/null
-			;;
-		"parole")
-			echo -e "$info \e[33mRecebendo vídeo...\e[0m"
-			proxychains -q parole $url 2>/dev/null &
-			;;
-		#Outras opções
-		#vlc $url #não funciona com proxychains
-	esac
-	exit 0
-done
+if [ $1 == "-audio" ]
+then
+	echo -e "$info \e[33mRecebendo áudio...\e[0m"
+	proxychains -q mplayer -vo null -cache 2048 $url 2>/dev/null
+elif [ $1 == "-video" ]
+then
+	echo -e "$info \e[33mRecebendo vídeo...\e[0m"
+	proxychains -q mplayer -cache 10000 $url 2>/dev/null
+fi
