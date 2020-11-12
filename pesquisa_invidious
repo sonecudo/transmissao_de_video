@@ -14,8 +14,8 @@ import requests, string
 from colorama import Fore,Back,Style
 from bs4 import BeautifulSoup
 
-#instancia="https://invidious.fdn.fr"
-instancia="https://invidious.snopyta.org"
+instancia="https://invidious.fdn.fr"
+#instancia="https://invidious.snopyta.org"
 
 search_term= sys.argv[1].replace(" ", "+");
 print("Disparando requisição! :: "+instancia+"/search?q="+search_term);
