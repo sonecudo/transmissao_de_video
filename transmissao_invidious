@@ -6,8 +6,12 @@ then
 	exit 0;
 fi
 
-qualidade="18" #qualidade baixa
-#qualidade="22" #qualidade alta
+if [ $1 == "-audio" ]; then
+	qualidade="251" #só audio
+else
+	qualidade="18" #qualidade média
+	#qualidade="22" #qualidade alta
+fi
 
 info="[\e[32mINFO\e[0m]"
 erro="[\e[31mERRO\e[0m]"
@@ -19,15 +23,41 @@ echo -e "$info\t~> \e[33m/watch?v=(id do vídeo)\e[0m"
 ##  Recebe url
 echo -n -e "$info Cole a url: ";
 read url
-vid=$(echo "$url" | sed "s/.*?v=//")
 
-## Requisita link de streaming para na primeira instância
-instancia="https://invidious.fdn.fr"
-link_req="$instancia/latest_version?id=$vid&itag=$qualidade"
-echo -e "$info Requisitando: \e[33m$link_req\e[0m"
-url=$(proxychains -q curl -i $link_req 2>/dev/null \
- |grep -i "location: " \
- |sed "s/location: //" )
+## Confere a url
+if [[ $(echo "$url" | grep -o "/watch?v=") == "/watch?v=" ]]
+then
+	# "Url correta!"
+	vid=$(echo "$url" | sed "s/.*\/watch?v=//"| sed "s/\&.*$//")
+else
+	# "Url incorreta!"
+	echo -e "$erro Url não compreendida"
+	exit 0;
+fi
+echo -e "$info ID do vídeo... \e[93m$vid\e[0m"
+
+## Requisita link de streaming
+instancias=(	"https://invidious.zapashcanon.fr"
+				"https://invidious.fdn.fr"
+				"https://invidious.snopyta.org"
+				"https://invidiou.site"
+				"https://invidious.kavin.rocks"
+				"https://invidious.fdn.fr"
+				"https://invidious.xyz"
+				"https://invidiou.site"
+				"https://tube.connect.cafe"
+			);
+for instancia in ${instancias[*]}
+do
+	link_req="$instancia/latest_version?id=$vid&itag=$qualidade"
+	echo -e "$info Requisitando: \e[33m$link_req\e[0m"
+	url=$(proxychains -q curl -i $link_req 2>/dev/null |grep -i "location: " |sed "s/location: //" )
+
+	#Se já achou a url, sai do loop
+	if [ ! -z "$url" ]; then
+		break;
+	fi
+done
 
 
 ## Se não conseguiu o link de streaming na primeira instância
@@ -53,7 +83,7 @@ echo -e "$info url: \e[2;96m$url\e[0m"
 if [ $1 == "-audio" ]
 then
 	echo -e "$info \e[33mRecebendo áudio...\e[0m"
-	proxychains -q mplayer -vo null -cache 2048 $url 2>/dev/null
+	proxychains -q mplayer -cache 2048 $url 2>/dev/null #-vo null (anularia video output que não tem com itag=251)
 elif [ $1 == "-video" ]
 then
 	echo -e "$info \e[33mRecebendo vídeo...\e[0m"

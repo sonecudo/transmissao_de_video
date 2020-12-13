@@ -14,22 +14,40 @@ import requests, string
 from colorama import Fore,Back,Style
 from bs4 import BeautifulSoup
 
-instancia="https://invidious.fdn.fr"
-#instancia="https://invidious.snopyta.org"
-
+instancias={	"https://invidious.snopyta.org",
+				"https://invidiou.site",
+				"https://invidious.kavin.rocks",
+				"https://invidious.fdn.fr",
+				"https://invidious.xyz",
+				"https://invidiou.site",
+				"https://tube.connect.cafe"
+			};
+			
 search_term= sys.argv[1].replace(" ", "+");
-print("Disparando requisição! :: "+instancia+"/search?q="+search_term);
-headers={"User-agent" : "Mozilla/5.0 (Windows NT 10; rv:68.0) Gecko/20100101 Firefox/68.0"};
-r = requests.get(instancia+"/search?q="+search_term);
-r.encoding="unicode";
+ua={"User-agent" : "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0"};
+tor={"http" : "socks5://127.0.0.1:9050", "https" : "socks5://127.0.0.1:9050"};
 
-soup = BeautifulSoup(r.text, "lxml");
+for instancia in instancias:
+	print("Disparando requisição! :: "+instancia+"/search?q="+search_term);
+	try:
+		r = requests.get(instancia+"/search?q="+search_term, proxies=tor, headers=ua);
+		r.encoding="unicode";
+	except:
+		print("Falha de conexão!");
+		exit(0);
 
-try:
-    soup = soup.find_all("div", class_="pure-g")[2];
-except:
-    print("Falha");
-    exit();
+	soup = BeautifulSoup(r.text, "lxml");
+	try:
+		soup = soup.find("div", class_="pure-u-md-20-24");
+		soup = soup.find_all("div", class_="pure-g")[2];
+	except:
+		print("Erro!");
+		continue;
+
+	if len( soup.find_all("div", class_="h-box") )==0:
+		print("Nada encontrado!");
+	else:
+		break;
 
 for video in soup.find_all("div", class_="h-box"):
 	print( "-------------" );
@@ -43,7 +61,7 @@ for video in soup.find_all("div", class_="h-box"):
 		titulo = video.find_all("a")[1];
 		views = video.find("div", class_="pure-u-1-3").text.strip();
 		print( Style.BRIGHT+Fore.GREEN+titulo.text.strip()+Style.RESET_ALL+" ["+video.p.text+"]"+" | "+Fore.CYAN+views+Style.RESET_ALL );
-		print( Fore.YELLOW+"https://invidious.fdn.fr"+titulo["href"]+Style.RESET_ALL );
+		print( Fore.YELLOW+instancia+titulo["href"]+Style.RESET_ALL );
 		print( Fore.YELLOW+"https://youtube.com"+titulo["href"]+Style.RESET_ALL );
 	except:
 		pass;
